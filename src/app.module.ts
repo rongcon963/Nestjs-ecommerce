@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ProductModule } from './product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     ProductModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

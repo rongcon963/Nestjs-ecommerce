@@ -14,6 +14,9 @@ export class Product {
   @Column()
   price: number;
 
+  @Column({ nullable: true })
+  quantity: number;
+
   // @Column(nullable)
   // category: string;
 }

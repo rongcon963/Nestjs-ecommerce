@@ -32,6 +32,16 @@
 $ npm install
 ```
 
+## Migration
+
+```bash
+# generate file migration
+$ npm run typeorm:generate --name=file_name
+
+# run migration
+$ npm run typeorm:run
+```
+
 ## Running the app
 
 ```bash

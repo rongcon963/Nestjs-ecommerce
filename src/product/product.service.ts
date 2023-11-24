@@ -19,14 +19,16 @@ export class ProductService {
     return newProduct;
   }
 
-  async getFilteredProducts(filterProductDTO: FilterProductDTO): Promise<Product[]> {
+  async getFilteredProducts(
+    filterProductDTO: FilterProductDTO,
+  ): Promise<Product[]> {
     const { search } = filterProductDTO;
     let products = await this.findAll();
 
     if (search) {
-      products = products.filter(product => 
-        product.name.includes(search) ||
-        product.description.includes(search)
+      products = products.filter(
+        (product) =>
+          product.name.includes(search) || product.description.includes(search),
       );
     }
 
@@ -39,8 +41,14 @@ export class ProductService {
   }
 
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOneBy({ id });
-    if (!product) throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: {
+        categories: true,
+      },
+    });
+    if (!product)
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
     return product;
   }
 
@@ -49,7 +57,7 @@ export class ProductService {
     updateProductDto: UpdateProductDTO,
   ): Promise<Product> {
     const updatedProduct = await this.findOne(id);
-    
+
     await this.productRepository.update(id, updateProductDto);
     return updatedProduct;
   }

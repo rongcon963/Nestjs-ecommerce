@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/category/entities/category.entity';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Product {
@@ -17,6 +24,17 @@ export class Product {
   @Column({ nullable: true })
   quantity: number;
 
-  // @Column(nullable)
-  // category: string;
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable({
+    name: 'category_product',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
+  })
+  categories?: Category[];
 }

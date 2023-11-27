@@ -9,6 +9,6 @@ export class Category {
   @Column()
   name: string;
 
-  @ManyToMany(() => Product, (product) => product.categories, { cascade: true })
+  @ManyToMany(() => Product, (product) => product.categories)
   products?: Product[];
 }

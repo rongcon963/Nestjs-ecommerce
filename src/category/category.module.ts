@@ -5,6 +5,7 @@ import { CategoryController } from './category.controller';
 import { CategoryService } from './category.service';
 import { CategoryProduct } from './entities/category-product.entity';
 import { Category } from './entities/category.entity';
+import { Product } from 'src/product/entities/product.entity';
 
 @Module({
   imports: [

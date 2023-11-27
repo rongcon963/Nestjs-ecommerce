@@ -10,11 +10,11 @@ export class CategoryProduct {
   @PrimaryColumn({ name: 'product_id' })
   productId: number;
 
-  @ManyToOne(() => Category, (category) => category.products, { cascade: true })
+  @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn([{ name: 'category_id', referencedColumnName: 'id' }])
-  category: Category;
+  categories: Category[];
 
-  @ManyToOne(() => Product, (product) => product.categories, { cascade: true })
+  @ManyToOne(() => Product, (product) => product.categories)
   @JoinColumn([{ name: 'product_id', referencedColumnName: 'id' }])
-  product: Product;
+  products: Product[];
 }

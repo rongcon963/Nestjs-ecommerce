@@ -3,4 +3,5 @@ export class CreateProductDTO {
   description: string;
   price: number;
   quantity: number;
+  categoryIds: number[];
 }

@@ -30,10 +30,12 @@ export class Product {
     joinColumn: {
       name: 'product_id',
       referencedColumnName: 'id',
+      foreignKeyConstraintName: 'category_product_product_id',
     },
     inverseJoinColumn: {
       name: 'category_id',
       referencedColumnName: 'id',
+      foreignKeyConstraintName: 'category_product_category_id',
     },
   })
   categories?: Category[];

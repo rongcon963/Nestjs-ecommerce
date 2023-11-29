@@ -5,18 +5,21 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryProduct } from './entities/category-product.entity';
 import { Category } from './entities/category.entity';
+import { Product } from 'src/product/entities/product.entity';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
-    @InjectRepository(CategoryProduct)
-    private categoryProductRepository: Repository<CategoryProduct>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
     const category = this.categoryRepository.create(createCategoryDto);
+    category.products = createCategoryDto.productIds.map((id) => ({
+      ...new Product(),
+      id,
+    }));
     await this.categoryRepository.save(category);
     return category;
   }

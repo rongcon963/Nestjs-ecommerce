@@ -15,6 +15,10 @@ export class ProductService {
 
   async create(createProductDTO: CreateProductDTO): Promise<Product> {
     const newProduct = await this.productRepository.create(createProductDTO);
+    newProduct.categories = createProductDTO.categoryIds.map((id) => ({
+      ...new Product(),
+      id,
+    }));
     await this.productRepository.save(newProduct);
     return newProduct;
   }
@@ -57,9 +61,18 @@ export class ProductService {
     updateProductDto: UpdateProductDTO,
   ): Promise<Product> {
     const updatedProduct = await this.findOne(id);
+    if (updateProductDto.categoryIds) {
+      updatedProduct.categories = updateProductDto.categoryIds.map((id) => ({
+        ...new Product(),
+        id,
+      }));
+    }
 
-    await this.productRepository.update(id, updateProductDto);
-    return updatedProduct;
+    const res = await this.productRepository.save(updatedProduct);
+    updateProductDto.categoryIds = undefined;
+    const up = await this.productRepository.update(id, updateProductDto);
+    const resUpdatedProduct = await this.findOne(id);
+    return resUpdatedProduct;
   }
 
   async remove(id: number) {

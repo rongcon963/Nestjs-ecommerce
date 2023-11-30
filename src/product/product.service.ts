@@ -61,16 +61,16 @@ export class ProductService {
     updateProductDto: UpdateProductDTO,
   ): Promise<Product> {
     const updatedProduct = await this.findOne(id);
-    if (updateProductDto.categoryIds) {
+    if (updateProductDto.categoryIds.length) {
       updatedProduct.categories = updateProductDto.categoryIds.map((id) => ({
         ...new Product(),
         id,
       }));
+      await this.productRepository.save(updatedProduct);
     }
 
-    const res = await this.productRepository.save(updatedProduct);
     updateProductDto.categoryIds = undefined;
-    const up = await this.productRepository.update(id, updateProductDto);
+    await this.productRepository.update(id, updateProductDto);
     const resUpdatedProduct = await this.findOne(id);
     return resUpdatedProduct;
   }

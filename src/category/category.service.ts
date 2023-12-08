@@ -16,10 +16,12 @@ export class CategoryService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     const category = this.categoryRepository.create(createCategoryDto);
-    category.products = createCategoryDto.productIds.map((id) => ({
-      ...new Product(),
-      id,
-    }));
+    if(createCategoryDto.productIds) {
+      category.products = createCategoryDto.productIds.map((id) => ({
+        ...new Product(),
+        id,
+      }));
+    }
     await this.categoryRepository.save(category);
     return category;
   }

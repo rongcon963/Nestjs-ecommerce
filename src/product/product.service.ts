@@ -15,10 +15,12 @@ export class ProductService {
 
   async create(createProductDTO: CreateProductDTO): Promise<Product> {
     const newProduct = await this.productRepository.create(createProductDTO);
-    newProduct.categories = createProductDTO.categoryIds.map((id) => ({
-      ...new Product(),
-      id,
-    }));
+    if(createProductDTO.categoryIds) {
+      newProduct.categories = createProductDTO.categoryIds.map((id) => ({
+        ...new Product(),
+        id,
+      }));
+    }
     await this.productRepository.save(newProduct);
     return newProduct;
   }
@@ -74,6 +76,20 @@ export class ProductService {
     const resUpdatedProduct = await this.findOne(id);
     return resUpdatedProduct;
   }
+
+  public updateProductQuantity = async (
+    updatedQuantity,
+    product,
+  ): Promise<Product> => {
+    try {
+      return this.productRepository.save({
+        ...product,
+        quantity: updatedQuantity,
+      });
+    } catch (err) {
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  };
 
   async remove(id: number) {
     const deleteProduct = await this.productRepository.delete(id);

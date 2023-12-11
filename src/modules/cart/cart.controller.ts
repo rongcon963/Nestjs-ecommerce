@@ -11,6 +11,8 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
+import { UserRequest } from 'src/shared/decorators/user.decorator';
+import { User } from '../user/entities/user.entity';
 
 @Controller('cart')
 export class CartController {
@@ -20,15 +22,15 @@ export class CartController {
   @Post()
   addProduct(
     @Body() createCartDto: CreateCartDto,
-    @Request() req,
+    @UserRequest() user: User,
   ) {
-    return this.cartService.addProduct(createCartDto, req?.user?.id);
+    return this.cartService.addProduct(createCartDto, user?.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Request() req) {
-    return this.cartService.findAll(req?.user?.id);
+  findAll(@UserRequest() user: User,) {
+    return this.cartService.findAll(user?.id);
   }
 
   @Get(':id')

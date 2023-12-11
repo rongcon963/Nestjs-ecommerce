@@ -8,6 +8,8 @@ import { LoginUserDTO } from './dto/login-user.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { UserRequest } from 'src/shared/decorators/user.decorator';
+import { User } from '../user/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -31,14 +33,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User)
   @Get('/user')
-  getProfile(@Request() req) {
-    return req.user;
+  getProfile(@UserRequest() user: User) {
+    return user;
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get('/admin')
-  getDashboard(@Request() req) {
-    return req.user;
+  getDashboard(@UserRequest() user: User) {
+    return user;
   }
 }

@@ -29,7 +29,7 @@ export class CartController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@UserRequest() user: User,) {
+  findAll(@UserRequest() user: User) {
     return this.cartService.findAll(user?.id);
   }
 

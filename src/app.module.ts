@@ -8,6 +8,7 @@ import { CategoryModule } from './modules//category/category.module';
 import { ProductModule } from './modules//product/product.module';
 import { UserModule } from './modules//user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -25,11 +26,12 @@ import { AuthModule } from './modules/auth/auth.module';
       }),
     }),
     ProductModule,
-    ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     AuthModule,
     CategoryModule,
     CartModule,
+    FileModule,
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService],

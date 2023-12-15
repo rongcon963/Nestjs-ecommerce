@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { Roles } from 'src/shared/decorators/roles.decorator';
-import { Role } from '../../shared/enums/role.enum';
+import { Role } from '../../shared/enums/user.enum';
 import { CreateUserDTO } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';

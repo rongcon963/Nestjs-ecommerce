@@ -7,9 +7,11 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '../user/user.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
+    MailModule,
     UserModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -19,7 +21,7 @@ import { UserModule } from '../user/user.module';
         secret: configService.get('JWT_SECRET'),
         signOptions: { expiresIn: configService.get<string>('EXPIRESIN') },
       }),
-    })
+    }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController]

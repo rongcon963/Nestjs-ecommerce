@@ -5,18 +5,22 @@ import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from '../auth/dto/login-user.dto';
+import { Status } from 'src/shared/enums/user.enum';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private mailService: MailService,
   ) {}
 
   async addUser(createUserDto: CreateUserDTO): Promise<User> {
     const newUser = await this.userRepository.create(createUserDto);
     newUser.password = await bcrypt.hash(newUser.password, 10);
     await this.userRepository.save(newUser);
+    await this.mailService.sendUserConfirmation(newUser);
     return newUser;
   }
 
@@ -35,6 +39,9 @@ export class UserService {
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+    }
+    if (user.status == Status.InActive) {
+      throw new HttpException(`Email hasn't been verified yet. Check your inbox`, HttpStatus.UNAUTHORIZED);
     }
 
     const is_equal = bcrypt.compareSync(password, user.password);

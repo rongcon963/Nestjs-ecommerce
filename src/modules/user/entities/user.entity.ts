@@ -1,4 +1,4 @@
-import { Role } from 'src/shared/enums/role.enum';
+import { Role, Status } from 'src/shared/enums/user.enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -21,4 +21,11 @@ export class User {
     default: Role.User
   })
   roles: Role;
+
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.InActive
+  })
+  status: Status;
 }

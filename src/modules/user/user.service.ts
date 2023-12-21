@@ -19,8 +19,8 @@ export class UserService {
   async addUser(createUserDto: CreateUserDTO): Promise<User> {
     const newUser = await this.userRepository.create(createUserDto);
     newUser.password = await bcrypt.hash(newUser.password, 10);
-    await this.userRepository.save(newUser);
-    await this.mailService.sendUserConfirmation(newUser);
+    // await this.userRepository.save(newUser);
+    await this.mailService.sendRegisterEmail(newUser);
     return newUser;
   }
 

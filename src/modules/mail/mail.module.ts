@@ -5,9 +5,14 @@ import { join } from 'path';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bull';
+import { EmailProcessor } from './mail.processor';
 
 @Module({
   imports: [
+    BullModule.registerQueue({
+      name: 'email',
+    }),
     MailerModule.forRootAsync({
       imports: [ConfigModule], // import module if not enabled globally
       useFactory: async (config: ConfigService) => ({
@@ -37,7 +42,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [MailController],
-  providers: [MailService],
+  providers: [MailService, EmailProcessor],
   exports: [MailService],
 })
 export class MailModule {}

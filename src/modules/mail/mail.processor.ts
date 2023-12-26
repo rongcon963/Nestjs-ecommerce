@@ -18,7 +18,6 @@ export class EmailProcessor {
   @Process('register-user')
   async sendRegisterEmail(job: Job<SendMail>) {
     const { data } = job;
-    const otpCode = generateOTP(6);
     // send the welcome email here
     await this.mailService.sendMail({
       to: data.data.email,
@@ -26,7 +25,7 @@ export class EmailProcessor {
       template: './confirmation',
       context: {
         name: data.data.username,
-        code: otpCode
+        code: data.data.otpCode
       },
     });
   }

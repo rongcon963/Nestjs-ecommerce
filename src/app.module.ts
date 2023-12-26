@@ -30,6 +30,7 @@ import { BullModule } from '@nestjs/bull';
       }),
     }),
     CacheModule.registerAsync({
+      isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({

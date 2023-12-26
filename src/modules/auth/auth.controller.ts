@@ -10,6 +10,7 @@ import { LocalAuthGuard } from './guards/local.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { User } from '../user/entities/user.entity';
+import { VerifyOtpDTO } from './dto/verify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +29,11 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginUserDTO: LoginUserDTO) {
     return this.authService.login(loginUserDTO);
+  }
+
+  @Post('/verify')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDTO) {
+    return this.authService.verify(verifyOtpDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

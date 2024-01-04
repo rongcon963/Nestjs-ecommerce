@@ -34,6 +34,16 @@ export class UserService {
     return newUser;
   }
 
+  async findOne(id: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id
+      }
+    });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
+  }
+
   async findUser(username: string): Promise<User | undefined> {
     const user = await this.userRepository.findOneBy({ username });
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -69,9 +79,17 @@ export class UserService {
     return user;
   }
 
+  async update(id: number, updateUserDto: UpdateUserDTO) {
+    const { username } = updateUserDto;
+
+    await this.userRepository.update(id, updateUserDto)
+    return await this.findUser(username);
+  }
+
   async updateUserStatus(email: string) {
     const user = await this.findUserByEmail(email);
     user.status = Status.Active;
+    
     await this.userRepository.save(user);
     return user;
   }

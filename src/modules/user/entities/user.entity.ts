@@ -1,3 +1,4 @@
+import { Exclude, instanceToPlain } from 'class-transformer';
 import { Role, Status } from 'src/shared/enums/user.enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -6,14 +7,21 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
+  phone: string;
+
+  @Exclude()
+  @Column()
   password: string;
+
+  @Column({ nullable: true })
+  avatar: string;
 
   @Column({
     type: "enum",
@@ -28,4 +36,8 @@ export class User {
     default: Status.InActive
   })
   status: Status;
+
+  toJSON() {
+    return instanceToPlain(this);
+  }
 }

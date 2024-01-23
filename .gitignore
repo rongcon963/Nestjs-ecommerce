@@ -37,6 +37,7 @@ lerna-debug.log*
 # ENV
 .env
 .vscode
+package-lock.json
 
 # migration
 /migrations

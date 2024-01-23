@@ -1,6 +1,7 @@
 import { Exclude, instanceToPlain } from 'class-transformer';
+import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { Role, Status } from 'src/shared/enums/user.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,7 +14,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   phone: string;
 
   @Exclude()
@@ -36,6 +37,9 @@ export class User {
     default: Status.InActive
   })
   status: Status;
+
+  @OneToMany(() => Cart, (cart) => cart.user)
+  cart: Cart[];
 
   toJSON() {
     return instanceToPlain(this);

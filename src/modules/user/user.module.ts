@@ -4,11 +4,13 @@ import { MailModule } from '../mail/mail.module';
 import { User } from './entities/user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
-    MailModule,
     TypeOrmModule.forFeature([User]),
+    MailModule,
+    CartModule,
   ],
   controllers: [UserController],
   providers: [UserService],

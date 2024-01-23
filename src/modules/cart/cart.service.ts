@@ -92,6 +92,16 @@ export class CartService {
     });
     return cartItems;
   }
+  
+  async getCartByUser(user_id: number) {
+    const cartItems = await this.cartRepository.find({
+      where: { user_id },
+      relations: {
+        product: true,
+      }
+    });
+    return cartItems;
+  }
 
   async findOne(userId: number) {
     const cartItem = await this.cartRepository.findOne({
@@ -102,10 +112,9 @@ export class CartService {
     return cartItem;
   }
 
-  async remove(id: number) {
-    const cartItem = await this.findOne(id);
-    await this.cartRepository.remove(cartItem)
-    return `This action removes a #${cartItem.id} cart`;
+  async remove(user_id: number) {
+    const cartItem = await this.findOne(user_id);
+    await this.cartRepository.remove(cartItem);
   }
   
   async removeProductQuantity(product, quantity) {

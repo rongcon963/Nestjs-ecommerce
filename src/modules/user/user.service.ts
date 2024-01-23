@@ -12,6 +12,8 @@ import { Cache } from 'cache-manager';
 import { Caching } from 'src/shared/constants';
 import { generateOTP } from 'src/shared/common/codeGenerator';
 import { UpdateUserDTO } from './dto/update-user.dto';
+import { CartService } from '../cart/cart.service';
+import { Cart } from '../cart/entities/cart.entity';
 
 @Injectable()
 export class UserService {
@@ -20,6 +22,7 @@ export class UserService {
     private userRepository: Repository<User>,
     private mailService: MailService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private cartService: CartService,
   ) {}
 
   async addUser(createUserDto: CreateUserDTO): Promise<User> {
@@ -42,6 +45,12 @@ export class UserService {
     });
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
+  }
+
+  async getUserInfo(id: number) {
+    const cart: Cart[] = await this.cartService.getCartByUser(id);
+    const user = await this.findOne(id);
+    return { user, cart }
   }
 
   async findUser(username: string): Promise<User | undefined> {

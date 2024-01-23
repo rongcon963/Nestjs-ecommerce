@@ -13,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FileModule } from './modules/file/file.module';
 import { MailModule } from './modules/mail/mail.module';
 import { BullModule } from '@nestjs/bull';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { BullModule } from '@nestjs/bull';
     FileModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,3 +1,4 @@
-export class CreatePaymentDto {
+export class CreatePaymentStripeDto {
   order_id: number;
+  currency: string;
 }

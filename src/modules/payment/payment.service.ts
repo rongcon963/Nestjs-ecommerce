@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { CreatePaymentStripeDto } from './dto/create-payment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
@@ -25,8 +24,9 @@ export class PaymentService {
     })
   }
 
-  async create(createPaymentDto: CreatePaymentDto, user_id: number) {
-    const {order_id} = createPaymentDto;
+  async chargeStripe(createPaymentStripeDto: CreatePaymentStripeDto, user_id: number) {
+    const {order_id} = createPaymentStripeDto;
+    const currency = createPaymentStripeDto.currency || 'usd';   
     const order = await this.orderService.findOne(order_id, user_id);
     if(order?.status !== OrderStatus.COMPLETE) {
       throw new HttpException('Order with Status COMPLETE is required', HttpStatus.BAD_REQUEST);
@@ -37,7 +37,7 @@ export class PaymentService {
     const paymentData = await this.paymentRepository.save(payment);
     const stripePaymentIntent = await this.stripe.paymentIntents.create({
       amount: order.total_price,
-      currency: 'usd',
+      currency: currency,
       automatic_payment_methods: {
         enabled: true,
       },
@@ -55,19 +55,49 @@ export class PaymentService {
     return chargePayment;
   }
 
-  findAll() {
-    return `This action returns all payment`;
+  public async constructEventFromPayload(signature: string, payload) {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const event = this.stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      webhookSecret,
+    );
+
+    return event;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
+  async handleEvent(event) {
+    switch (event.type) {
+      case 'payment_intent.created':
+        await this.setPaymentStatus(event, PaymentStatus.CREATED);
+      case 'payment_intent.succeeded':
+        await this.setPaymentStatus(event, PaymentStatus.PROCESSING);
+        break;
+      case 'charge.succeeded':
+        await this.setPaymentStatus(event, PaymentStatus.SUCCEEDED);
+        break;
+      case 'payment_intent.canceled':
+        await this.setPaymentStatus(event, PaymentStatus.FAILED);
+        break;
+      case 'payment_intent.payment_failed':
+        await this.setPaymentStatus(event, PaymentStatus.FAILED);
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+    return 'Success';
   }
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async setPaymentStatus(event, status: PaymentStatus) {
+    const payment = await this.paymentRepository.findOne({
+      where: {
+        payment_intent_id: event.data.object.payment_intent,
+      }
+    });
+    if (!payment) {
+      throw new HttpException('Payment not found!', HttpStatus.NOT_FOUND);
+    }
+    payment.status = status;
+    return await this.paymentRepository.save(payment);
   }
 }

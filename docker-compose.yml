@@ -41,6 +41,15 @@ services:
       - minio_data:/data
     command: server --console-address ":9001" /data
 
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: stripe-cli
+    # network_mode: host
+    environment:
+        STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+        STRIPE_DEVICE_NAME: ${STRIPE_DEVICE_NAME}
+    command: "listen --forward-to host.docker.internal:3000/payment/webhook/stripe"
+
 volumes:
   postgres-db:
     driver: local

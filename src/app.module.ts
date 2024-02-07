@@ -15,6 +15,8 @@ import { MailModule } from './modules/mail/mail.module';
 import { BullModule } from '@nestjs/bull';
 import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
 
 @Module({
   imports: [
@@ -67,6 +69,12 @@ import { PaymentModule } from './modules/payment/payment.module';
     PaymentModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule { }

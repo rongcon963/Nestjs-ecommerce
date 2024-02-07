@@ -2,7 +2,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { SendMail } from './dto/send-mail.dto';
-import { generateOTP } from 'src/shared/common/codeGenerator';
 
 @Processor('email')
 export class EmailProcessor {

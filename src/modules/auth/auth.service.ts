@@ -1,12 +1,12 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../user/user.service';
-import { LoginUserDTO } from './dto/login-user.dto';
-import { User } from '../user/entities/user.entity';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Caching } from 'src/shared/constants';
+import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { LoginUserDTO } from './dto/login-user.dto';
 import { VerifyOtpDTO } from './dto/verify-otp.dto';
 
 @Injectable()
@@ -41,6 +41,7 @@ export class AuthService {
 
   async verify(verifyOtpDto: VerifyOtpDTO) {
     const {email, otp} = verifyOtpDto;
+    await this.userService.findUserByEmail(email);
     const otpCache = await this.cacheManager.get(`${Caching.CACHE_USER_REGISTER_PREFIX}:${email}`);
     if (!otpCache) {
       throw new HttpException('OTP has expire!!', HttpStatus.NOT_FOUND);

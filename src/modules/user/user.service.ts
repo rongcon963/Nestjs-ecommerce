@@ -25,16 +25,28 @@ export class UserService {
     private cartService: CartService,
   ) {}
 
-  async addUser(createUserDto: CreateUserDTO): Promise<User> {
-    const newUser = await this.userRepository.create(createUserDto);
+  async addUser(createUserDto: CreateUserDTO) {
+    const newUser = this.userRepository.create(createUserDto);
     const {email, username} = newUser;
+    const existUsername = await this.userRepository.findOneBy({ username });
+    if (existUsername) {
+      throw new HttpException('Username already exist!', HttpStatus.CONFLICT);
+    }
+    const existEmail = await this.userRepository.findOneBy({ email });
+    if (existEmail) {
+      throw new HttpException('Email already exist!', HttpStatus.CONFLICT);
+    }
     const otpCode = generateOTP(6);
     
     newUser.password = await bcrypt.hash(newUser.password, 10);
-    await this.userRepository.save(newUser);
-    await this.cacheManager.set(`${Caching.CACHE_USER_REGISTER_PREFIX}:${email}`, otpCode, { ttl: 5000 });
+    await this.cacheManager.set(`${Caching.CACHE_USER_REGISTER_PREFIX}:${email}`, otpCode, { ttl: 120 });
+    const expireTime = await this.cacheManager.store.ttl(`${Caching.CACHE_USER_REGISTER_PREFIX}:${email}`);
     await this.mailService.sendRegisterEmail({email, username, otpCode});
-    return newUser;
+    await this.userRepository.save(newUser);
+    return {
+      user: newUser,
+      expireTime,
+    };
   }
 
   async findOne(id: number) {
@@ -66,17 +78,17 @@ export class UserService {
   }
 
   async findByLogin({ username, password }: LoginUserDTO) {
-    const user = await this.userRepository.findOne({
-      where: {
-        username
-      }
-    });
-
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
-    }
+    const user = await this.findUser(username);
     if (user.status == Status.InActive) {
-      throw new HttpException(`Email hasn't been verified yet. Check your inbox`, HttpStatus.UNAUTHORIZED);
+      const otpCode = generateOTP(6);
+      await this.cacheManager.set(`${Caching.CACHE_USER_REGISTER_PREFIX}:${user.email}`, otpCode, { ttl: 120 });
+      const expireTime = await this.cacheManager.store.ttl(`${Caching.CACHE_USER_REGISTER_PREFIX}:${user.email}`);
+      await this.mailService.sendRegisterEmail({email: user.email, username: user.username, otpCode});
+      throw new HttpException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: `Email hasn't been verified yet. Check your inbox`,
+        expireTime
+      }, HttpStatus.UNAUTHORIZED);
     }
 
     const is_equal = bcrypt.compareSync(password, user.password);

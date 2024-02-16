@@ -28,4 +28,30 @@ export class EmailProcessor {
       },
     });
   }
+
+  @Process('forgot-password-token')
+  async forgotPassword(job: Job<SendMail>) {
+    const { data } = job;
+    // send forgot password token here
+    await this.mailService.sendMail({
+      to: data.data.email,
+      subject: 'Welcome to Nice App! Link forgot password',
+      template: './forgot-password-token',
+      context: {
+        url: data.data.resetUrl
+      }
+    })
+  }
+
+  @Process('reset-password-token')
+  async resetPassword(job: Job<SendMail>) {
+    const { data } = job;
+    // send confirm reset password token here
+    await this.mailService.sendMail({
+      to: data.data.email,
+      subject: 'Welcome to Nice App! Password Reset Confirm',
+      template: './reset-password-token',
+      context: {}
+    })
+  }
 }

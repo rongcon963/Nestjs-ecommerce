@@ -13,4 +13,14 @@ export class MailService {
     const job = await this.emailQueue.add('register-user', { data });
     return { jobId: job.id };
   }
+
+  async forgotPasswordToken(data: SendMail) {
+    const job = await this.emailQueue.add('forgot-password-token', { data });
+    return { jobId: job.id };
+  }
+
+  async resetPasswordToken(data: SendMail) {
+    const job = await this.emailQueue.add('reset-password-token', { data });
+    return { jobId: job.id };
+  }
 }

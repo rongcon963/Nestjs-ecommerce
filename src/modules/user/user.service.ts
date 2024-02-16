@@ -101,10 +101,8 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDTO) {
-    const { username } = updateUserDto;
-
     await this.userRepository.update(id, updateUserDto)
-    return await this.findUser(username);
+    return await this.findOne(id);
   }
 
   async updateUserStatus(email: string) {

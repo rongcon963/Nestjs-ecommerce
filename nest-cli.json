@@ -5,7 +5,8 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      "modules/mail/**/*.hbs"
+      "modules/mail/**/*.hbs",
+      "modules/mail-template/**/*.hbs"
     ],
     "watchAssets": true
   }

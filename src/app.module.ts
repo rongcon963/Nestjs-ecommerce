@@ -17,6 +17,7 @@ import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
+import { MailTemplateModule } from './modules/mail-template/mail-template.module';
 
 @Module({
   imports: [
@@ -62,11 +63,12 @@ import { ResponseInterceptor } from './shared/interceptors/response.interceptor'
     AuthModule,
     CategoryModule,
     CartModule,
-    FileModule,
+    // FileModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     OrderModule,
     PaymentModule,
+    MailTemplateModule,
   ],
   controllers: [AppController],
   providers: [

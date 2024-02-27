@@ -2,7 +2,9 @@ import { Body, Controller, HttpException, HttpStatus, Post, Req } from '@nestjs/
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { CreatePaymentStripeDto } from './dto/create-payment.dto';
 import { PaymentService } from './payment.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}

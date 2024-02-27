@@ -4,13 +4,16 @@ import { UpdateUserDTO } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { User } from './entities/user.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
+  @ApiBearerAuth('JWT-auth')
+  @Get()
   findOne(@UserRequest() user: User) {
     return this.userService.findOne(user?.id);
   }

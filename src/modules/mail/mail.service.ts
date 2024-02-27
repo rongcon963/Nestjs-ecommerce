@@ -10,6 +10,7 @@ export class MailService {
   ) {}
 
   async sendRegisterEmail(data: SendMail) {
+    console.log(data)
     const job = await this.emailQueue.add('register-user', { data });
     return { jobId: job.id };
   }

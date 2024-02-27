@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { MailTemplateService } from './mail-template.service';
-import { CreateMailTemplateDto } from './dto/create-mail-template.dto';
-import { UpdateMailTemplateDto } from './dto/update-mail-template.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('mail-template')
 @Controller('mail-template')
 export class MailTemplateController {
   constructor(private readonly mailTemplateService: MailTemplateService) {}

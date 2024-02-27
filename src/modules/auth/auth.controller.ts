@@ -14,7 +14,9 @@ import { VerifyOtpDTO } from './dto/verify-otp.dto';
 import { ResendOtpDTO } from './dto/resend-otp.dto';
 import { ForgotPasswordTokenDTO } from './dto/forgot-password-token.dto';
 import { ResetPasswordTokenDTO } from './dto/reset-password-token.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -61,6 +63,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('JWT-auth')
   @Roles(Role.User)
   @Get('/user')
   getProfile(@UserRequest() user: User) {
@@ -68,6 +71,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('JWT-auth')
   @Roles(Role.Admin)
   @Get('/admin')
   getDashboard(@UserRequest() user: User) {

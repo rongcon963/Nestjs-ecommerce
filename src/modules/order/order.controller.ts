@@ -6,12 +6,15 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { CompleteOrderDTO } from './dto/complete-order.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('order')
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post()
   create(
     @UserRequest() user: User,
@@ -20,6 +23,7 @@ export class OrderController {
   }
   
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post('complete')
   completeOrder(
     @Body() completeOrderDto: CompleteOrderDTO,
@@ -34,6 +38,7 @@ export class OrderController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Get(':id')
   findOne(
     @Param('id') id: string,

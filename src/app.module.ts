@@ -63,7 +63,7 @@ import { MailTemplateModule } from './modules/mail-template/mail-template.module
     AuthModule,
     CategoryModule,
     CartModule,
-    // FileModule,
+    FileModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     OrderModule,

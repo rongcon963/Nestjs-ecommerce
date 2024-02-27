@@ -13,12 +13,15 @@ import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { User } from '../user/entities/user.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('cart')
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post()
   addProduct(
     @Body() createCartDto: CreateCartDto,
@@ -28,6 +31,7 @@ export class CartController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Get()
   findAll(@UserRequest() user: User) {
     return this.cartService.findAll(user?.id);

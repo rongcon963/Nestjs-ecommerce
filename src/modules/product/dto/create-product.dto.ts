@@ -14,5 +14,5 @@ export class CreateProductDTO {
   quantity: number;
 
   @ApiProperty()
-  categoryIds: number[];
+  category_ids: number[];
 }

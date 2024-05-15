@@ -5,6 +5,6 @@ export class CreateCategoryDto {
   name: string;
 
   @ApiProperty()
-  productIds: number[];
+  product_ids: number[];
   // products: Product[];
 }

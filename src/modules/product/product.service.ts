@@ -14,9 +14,9 @@ export class ProductService {
   ) {}
 
   async create(createProductDTO: CreateProductDTO): Promise<Product> {
-    const newProduct = await this.productRepository.create(createProductDTO);
-    if(createProductDTO.categoryIds) {
-      newProduct.categories = createProductDTO.categoryIds.map((id) => ({
+    const newProduct = this.productRepository.create(createProductDTO);
+    if(createProductDTO.category_ids) {
+      newProduct.categories = createProductDTO.category_ids.map((id) => ({
         ...new Product(),
         id,
       }));
@@ -63,16 +63,15 @@ export class ProductService {
     updateProductDto: UpdateProductDTO,
   ): Promise<Product> {
     const updatedProduct = await this.findOne(id);
-    if (updateProductDto.categoryIds.length) {
-      updatedProduct.categories = updateProductDto.categoryIds.map((id) => ({
+    updatedProduct.categories = []
+    if (updateProductDto.category_ids?.length) {
+      updatedProduct.categories = updateProductDto.category_ids.map((id) => ({
         ...new Product(),
         id,
       }));
-      await this.productRepository.save(updatedProduct);
     }
-
-    updateProductDto.categoryIds = undefined;
-    await this.productRepository.update(id, updateProductDto);
+    await this.productRepository.save({ ...updatedProduct, ...updateProductDto});
+    
     const resUpdatedProduct = await this.findOne(id);
     return resUpdatedProduct;
   }

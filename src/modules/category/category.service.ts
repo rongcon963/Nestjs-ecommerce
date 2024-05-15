@@ -16,8 +16,8 @@ export class CategoryService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     const category = this.categoryRepository.create(createCategoryDto);
-    if(createCategoryDto.productIds) {
-      category.products = createCategoryDto.productIds.map((id) => ({
+    if(createCategoryDto.product_ids) {
+      category.products = createCategoryDto.product_ids.map((id) => ({
         ...new Product(),
         id,
       }));
@@ -32,7 +32,14 @@ export class CategoryService {
   }
 
   async findOne(id: number) {
-    const category = await this.categoryRepository.findOneBy({ id });
+    const category = await this.categoryRepository.findOne({
+      where: {
+        id
+      },
+      relations : {
+        products: true,
+      }
+    });
     if (!category) {
       throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
     }
@@ -40,9 +47,16 @@ export class CategoryService {
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const updatedCategory = await this.findOne(id);
+    updatedCategory.products = []
+    if (updateCategoryDto.product_ids?.length) {
+      updatedCategory.products = updateCategoryDto.product_ids.map((id) => ({
+        ...new Product(),
+        id,
+      }));
+    }
+    await this.categoryRepository.save({ ...updatedCategory, ...updateCategoryDto })
     const category = await this.findOne(id);
-
-    await this.categoryRepository.update(id, updateCategoryDto);
     return category;
   }
 

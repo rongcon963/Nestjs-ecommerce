@@ -1,13 +1,8 @@
 import { MailTemplateStatus } from "src/shared/enums/mail-template.enum";
-import { AfterUpdate, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { MailTemplateService } from "../mail-template.service";
-import * as fs from 'fs';
-import * as path from 'path';
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('mail_template')
 export class MailTemplate {
-  constructor(private readonly mailTemplateService: MailTemplateService) {}
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,16 +18,10 @@ export class MailTemplate {
   @Column()
   content: string;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: MailTemplateStatus,
+    default: MailTemplateStatus.ENABLED
+  })
   status: MailTemplateStatus;
-
-  @AfterUpdate()
-  async beforeUpdate() {
-    // Render the updated template data
-    const content = await this.mailTemplateService.renderTemplate(this, {});
-
-    // Update the .hbs file
-    const filePath = path.join(process.cwd(), `./src/modules/mail-template/templates/${this.name}.hbs`);
-    await fs.promises.writeFile(filePath, content);
-  }
 }

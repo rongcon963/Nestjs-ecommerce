@@ -14,6 +14,7 @@ import { generateOTP } from 'src/shared/common/codeGenerator';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { CartService } from '../cart/cart.service';
 import { Cart } from '../cart/entities/cart.entity';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class UserService {
@@ -23,10 +24,15 @@ export class UserService {
     private mailService: MailService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private cartService: CartService,
+    private paymentService: PaymentService,
   ) {}
 
   async addUser(createUserDto: CreateUserDTO) {
-    const newUser = this.userRepository.create(createUserDto);
+    const stripeCustomer = await this.paymentService.createCustomer(createUserDto.username, createUserDto.email);
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      stripe_customer_id: stripeCustomer.id,
+    });
     const {email, username} = newUser;
     const existUsername = await this.userRepository.findOneBy({ username });
     if (existUsername) {

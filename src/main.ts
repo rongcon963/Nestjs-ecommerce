@@ -2,10 +2,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import rawBodyMiddleware from './shared/middleware/rawBody.middleware';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { resolve } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+  app.use(rawBodyMiddleware());
+  app.enableCors();
+  app.setBaseViewsDir(resolve('./src/views'));;
+  app.setViewEngine('hbs');
   const config = new DocumentBuilder()
     .setTitle('Ecommerce')
     .setDescription('Ecommerce API description')

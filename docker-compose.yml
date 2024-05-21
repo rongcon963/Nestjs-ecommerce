@@ -26,7 +26,7 @@ services:
     container_name: redisinsight
     image: redislabs/redisinsight
     ports:
-      - '8001:8001'
+      - '5540:5540'
 
   minio:
     image: minio/minio

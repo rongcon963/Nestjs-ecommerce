@@ -26,12 +26,7 @@ export class ProductController {
 
   @Get()
   async findAll(@Query() filterProductDTO: FilterProductDTO) {
-    if (Object.keys(filterProductDTO).length) {
-      const filteredProducts = await this.productService.getFilteredProducts(filterProductDTO);
-      return filteredProducts;
-    } else {
-      return await this.productService.findAll();
-    }
+    return await this.productService.findAll(filterProductDTO);
   }
 
   @Get(':id')

@@ -8,6 +8,7 @@ import { OrderStatus } from 'src/shared/enums/order.enum';
 import { PaymentStatus } from 'src/shared/enums/payment.enum';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
+import { Order } from '../order/entities/order.entity';
 
 @Injectable()
 export class PaymentService {
@@ -24,6 +25,13 @@ export class PaymentService {
     })
   }
 
+  public async createCustomer(name: string, email: string) {
+    return this.stripe.customers.create({
+      name,
+      email
+    });
+  }
+
   async chargeStripe(createPaymentStripeDto: CreatePaymentStripeDto, user_id: number) {
     const {order_id} = createPaymentStripeDto;
     const currency = createPaymentStripeDto.currency || 'usd';   
@@ -34,25 +42,31 @@ export class PaymentService {
     const payment = await this.paymentRepository.create({
       status: PaymentStatus.CREATED,
     })
-    const paymentData = await this.paymentRepository.save(payment);
     const stripePaymentIntent = await this.stripe.paymentIntents.create({
-      amount: order.total_price,
+      amount: this.stripeFormattedPrice(order),
       currency: currency,
+      customer: 'cus_Q7FFuDeWOTRol5',
       automatic_payment_methods: {
         enabled: true,
       },
       metadata: {
         order_id: order.id,
-        payment_id: payment.id,
       },
     });
     const chargePayment = await this.paymentRepository.save({
-      ...paymentData,
+      ...payment,
       payment_intent_id: stripePaymentIntent?.id,
-      amount: stripePaymentIntent?.amount,
+      amount: Number((stripePaymentIntent?.amount / 100).toFixed(0)),
       client_secret: stripePaymentIntent?.client_secret,
     });
-    return chargePayment;
+    return {
+      client_secret: chargePayment.client_secret
+    };
+  }
+
+  stripeFormattedPrice(order: Order): number {
+    const stripeFormattedPrice: number = order.total_price * 100;
+    return Number(stripeFormattedPrice.toFixed(0));
   }
 
   public async constructEventFromPayload(signature: string, payload) {
@@ -89,9 +103,10 @@ export class PaymentService {
   }
 
   async setPaymentStatus(event, status: PaymentStatus) {
+    const { payment_intent } = event.data.object;
     const payment = await this.paymentRepository.findOne({
       where: {
-        payment_intent_id: event.data.object.payment_intent,
+        payment_intent_id: payment_intent
       }
     });
     if (!payment) {

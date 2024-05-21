@@ -5,6 +5,7 @@ import { Product } from '../product/entities/product.entity';
 import { ProductService } from '../product/product.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { Cart } from './entities/cart.entity';
+import { FilterCartDTO } from './dto/filter-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -14,9 +15,9 @@ export class CartService {
     private productService: ProductService,
   ) {}
 
-  async createCartItem(quantity, product: Product, userId: number) {
+  async createCartItem(product: Product, user_id: number) {
     const cartItem = this.cartRepository.create({
-      user: {id: userId},
+      user: {id: user_id},
       product: {id: product.id},
       quantity: 0,
     });
@@ -52,7 +53,7 @@ export class CartService {
       await this.addCartItemQuantity(quantity, cartItem, product);
       return await this.getCartItemById(cartItem?.id);
     } else {
-      const cartItem = await this.createCartItem(quantity, product, user_id);
+      const cartItem = await this.createCartItem(product, user_id);
       await this.addCartItemQuantity(quantity, cartItem, product);
       return await this.getCartItemById(cartItem?.id);
     }
@@ -72,25 +73,34 @@ export class CartService {
   }
 
   async findCartItemByUserAndProduct(
-    userId: number,
-    productId: number,
+    user_id: number,
+    product_id: number,
   ): Promise<Cart> {
     return await this.cartRepository.findOne({
       where: {
-        product: { id: productId },
-        user: { id: userId },
+        product: { id: product_id },
+        user: { id: user_id },
       },
     });
   }
 
-  async findAll(userId: number) {
-    const cartItems = await this.cartRepository.find({
-      where: { user: { id: userId } },
+  async findAll(user_id: number, filterCartDTO: FilterCartDTO) {
+    const {limit, page} = filterCartDTO;
+    
+    const offset = (page-1) * limit;
+    const [ cartItems, totalCartItem ] = await this.cartRepository.findAndCount({
+      where: { user: { id: user_id } },
+      take: limit,
+      skip: offset,
       relations: {
         product: true,
       },
     });
-    return cartItems;
+    const pageCount = Math.ceil(Number(totalCartItem) / Number(limit));
+    return {
+      cartItems,
+      pageCount
+    };
   }
   
   async getCartByUser(user_id: number) {
@@ -117,7 +127,7 @@ export class CartService {
     await this.cartRepository.remove(cartItem);
   }
   
-  async removeProductQuantity(product, quantity) {
+  async removeProductQuantity(product: Product, quantity: number) {
     const updatedQuantity = product.quantity - quantity;
     await this.productService.updateProductQuantity(updatedQuantity, product);
   }

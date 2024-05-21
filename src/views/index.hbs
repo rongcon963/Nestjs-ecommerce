@@ -1,0 +1,51 @@
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- Your payment form -->
+<form id="payment-form">
+  <div id="card-element">
+    <!-- Stripe.js injects the Card Element -->
+  </div>
+  <button id="submit">Pay</button>
+  <div id="error-message"></div>
+</form>
+
+<script>
+  // Create a Stripe client.
+  const stripe = Stripe('{{public_key}}');
+
+  // Create an instance of Elements.
+  const elements = stripe.elements();
+
+  // Create an instance of the card Element.
+  const card = elements.create('card');
+
+  // Add an instance of the card Element into the `card-element` div.
+  card.mount('#card-element');
+
+  // Handle form submission.
+  const form = document.getElementById('payment-form');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const { data } = await fetch('http://localhost:3000/payment/stripe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: 1 }),
+    }).then(r => r.json());
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
+      payment_method: {
+        card: card,
+      }
+    });
+
+    if (error) {
+      // Show error to your customer
+      document.getElementById('error-message').textContent = error.message;
+    } else if (paymentIntent.status === 'succeeded') {
+      // The payment succeeded!
+      console.log('Payment succeeded!');
+    }
+  });
+</script>

@@ -5,8 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      "modules/mail/**/*.hbs",
-      "modules/mail-template/**/*.hbs"
+      { "include": "**/*.hbs", "outDir": "dist/src" }
     ],
     "watchAssets": true
   }

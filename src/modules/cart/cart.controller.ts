@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Request,
   UseGuards
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { CreateCartDto } from './dto/create-cart.dto';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FilterCartDTO } from './dto/filter-cart.dto';
 
 @ApiTags('cart')
 @Controller('cart')
@@ -33,8 +35,11 @@ export class CartController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @Get()
-  findAll(@UserRequest() user: User) {
-    return this.cartService.findAll(user?.id);
+  findAll(
+    @UserRequest() user: User,
+    @Query() filterCartDTO: FilterCartDTO
+  ) {
+    return this.cartService.findAll(user?.id, filterCartDTO);
   }
 
   @Get(':id')

@@ -38,6 +38,9 @@ export class User {
   })
   status: Status;
 
+  @Column()
+  stripe_customer_id: string;
+
   @OneToMany(() => Cart, (cart) => cart.user)
   cart: Cart[];
 

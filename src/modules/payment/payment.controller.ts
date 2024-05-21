@@ -1,8 +1,9 @@
-import { Body, Controller, HttpException, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Headers, Controller, HttpException, HttpStatus, Post, Req } from '@nestjs/common';
 import { UserRequest } from 'src/shared/decorators/user.decorator';
 import { CreatePaymentStripeDto } from './dto/create-payment.dto';
 import { PaymentService } from './payment.service';
 import { ApiTags } from '@nestjs/swagger';
+import RequestWithRawBody from '../../shared/interface/requestWithRawBody.interface';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -16,25 +17,24 @@ export class PaymentController {
 
   @Post('webhook/stripe')
   async handleInComingEventStripe(
-    @Req() request: Request,
+    @Headers('stripe-signature') signature: string,
+    @Req() request: RequestWithRawBody,
   ) {
-    const signature = request.headers['stripe-signature'];
-
     let event;
     
-    if(process.env.NODE_ENV === 'production') {
+    // if(process.env.NODE_ENV === 'dev') {
       if (!signature) {
         throw new HttpException('Missing stripe-signature header', HttpStatus.NOT_FOUND)
       }
 
       event = await this.paymentService.constructEventFromPayload(
         signature,
-        request.body,
+        request.rawBody,
       );
-    }
+    // }
     
-    event = request.body;
-    console.log(request.body)
+    // event = request.body;
+    // console.log(request.body)
 
     await this.paymentService.handleEvent(event);
   }

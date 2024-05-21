@@ -12,7 +12,6 @@ export class FileController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     await this.minioService.createBucketIfNotExists();
-    console.log(file);
     const fileName = await this.minioService.uploadFile(file);
     return fileName;
   }

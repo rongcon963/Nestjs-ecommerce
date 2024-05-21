@@ -1,4 +1,4 @@
-import { PaymentStatus } from "src/shared/enums/payment.enum";
+import { PaymentStatus } from "../../../shared/enums/payment.enum";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -6,7 +6,11 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: PaymentStatus,
+    default: PaymentStatus.CREATED
+  })
   status: PaymentStatus;
 
   @Column({ nullable: true })

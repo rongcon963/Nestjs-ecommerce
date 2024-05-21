@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
 import { UpdateProductDTO } from './dto/update-product.dto';
@@ -25,25 +25,22 @@ export class ProductService {
     return newProduct;
   }
 
-  async getFilteredProducts(
-    filterProductDTO: FilterProductDTO,
-  ): Promise<Product[]> {
-    const { search } = filterProductDTO;
-    let products = await this.findAll();
-
-    if (search) {
-      products = products.filter(
-        (product) =>
-          product.name.includes(search) || product.description.includes(search),
-      );
-    }
-
-    return products;
-  }
-
-  async findAll(): Promise<Product[]> {
-    const products = await this.productRepository.find();
-    return products;
+  async findAll(filterProductDTO: FilterProductDTO) {
+    const {search, limit, page} = filterProductDTO;
+    
+    const offset = (page-1) * limit;
+    const [ products, totalProduct ] = await this.productRepository.findAndCount({
+      where: {
+        name: ILike(`%${search}%`)
+      },
+      take: limit,
+      skip: offset,
+    });
+    const pageCount = Math.ceil(Number(totalProduct) / Number(limit));
+    return {
+      products,
+      pageCount
+    };
   }
 
   async findOne(id: number): Promise<Product> {

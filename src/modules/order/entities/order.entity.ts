@@ -11,7 +11,11 @@ export class Order {
   @Column()
   user_id: number;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: OrderStatus,
+    default: OrderStatus.CREATED
+  })
   status: OrderStatus;
 
   @Column({ type: 'decimal' })

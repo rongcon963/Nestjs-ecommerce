@@ -3,6 +3,10 @@
 
 <!-- Your payment form -->
 <form id="payment-form">
+  <label for="orderId">Order Id</label>
+  <input name="order_id" type="number" id="orderId" class="orderClass">
+  <label for="tokenId">Token User</label>
+  <input name="token" type="text" id="tokenId" class="tokenClass">
   <div id="card-element">
     <!-- Stripe.js injects the Card Element -->
   </div>
@@ -28,10 +32,16 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
+    const order_id = document.getElementById("orderId").value;
+    const token = document.getElementById("tokenId").value;
+
     const { data } = await fetch('http://localhost:3000/payment/stripe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order_id: 1 }),
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ order_id , currency: 'usd' }),
     }).then(r => r.json());
 
     const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {

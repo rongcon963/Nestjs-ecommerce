@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { CreatePaymentStripeDto } from './dto/create-payment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
@@ -9,6 +9,7 @@ import { PaymentStatus } from 'src/shared/enums/payment.enum';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { Order } from '../order/entities/order.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class PaymentService {
@@ -19,6 +20,8 @@ export class PaymentService {
     private paymentRepository: Repository<Payment>,
     private orderService: OrderService,
     private configService: ConfigService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
   ) {
     this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY'), {
       apiVersion: '2023-10-16',
@@ -36,6 +39,7 @@ export class PaymentService {
     const {order_id} = createPaymentStripeDto;
     const currency = createPaymentStripeDto.currency || 'usd';   
     const order = await this.orderService.findOne(order_id, user_id);
+    const customer = await this.userService.findOne(user_id)
     if(order?.status !== OrderStatus.COMPLETE) {
       throw new HttpException('Order with Status COMPLETE is required', HttpStatus.BAD_REQUEST);
     }
@@ -45,7 +49,7 @@ export class PaymentService {
     const stripePaymentIntent = await this.stripe.paymentIntents.create({
       amount: this.stripeFormattedPrice(order),
       currency: currency,
-      customer: 'cus_Q7FFuDeWOTRol5',
+      customer: customer.stripe_customer_id,
       automatic_payment_methods: {
         enabled: true,
       },
@@ -56,7 +60,7 @@ export class PaymentService {
     const chargePayment = await this.paymentRepository.save({
       ...payment,
       payment_intent_id: stripePaymentIntent?.id,
-      amount: Number((stripePaymentIntent?.amount / 100).toFixed(0)),
+      amount: order.total_price,
       client_secret: stripePaymentIntent?.client_secret,
     });
     return {
@@ -103,7 +107,12 @@ export class PaymentService {
   }
 
   async setPaymentStatus(event, status: PaymentStatus) {
-    const { payment_intent } = event.data.object;
+    let payment_intent;
+    if (event?.data?.object?.object === 'payment_intent') {
+      payment_intent = event?.data?.object?.id;
+    } else if (event?.data?.object?.object === 'charge') {
+      payment_intent = event?.data?.object?.payment_intent;
+    }
     const payment = await this.paymentRepository.findOne({
       where: {
         payment_intent_id: payment_intent

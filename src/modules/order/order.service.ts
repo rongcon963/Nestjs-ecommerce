@@ -10,12 +10,15 @@ import { OrderStatus } from 'src/shared/enums/order.enum';
 import { CompleteOrderDTO } from './dto/complete-order.dto';
 import { CartService } from '../cart/cart.service';
 import { CancelOrderDTO } from './dto/cancel-order.dto';
+import { OrderItem } from './entities/order-item.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private orderItemRepository: Repository<OrderItem>,
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private cartService: CartService,
@@ -24,6 +27,9 @@ export class OrderService {
   async create(user_id: number) {
     const existOrder: Order = await this.getCreatedOrder(OrderStatus.CREATED, user_id)
     const user = await this.userService.getUserInfo(user_id);
+    if (user.cart.length === 0) {
+      throw new HttpException('Your cart is empty!!', HttpStatus.BAD_REQUEST);
+    }
     const total_price = this.calcTotalPrice(user.cart);
     const sub_total = this.calcSubtotal(user.cart);
     let order: Order;
@@ -43,8 +49,20 @@ export class OrderService {
         sub_total,
       })
     }
-    await this.orderRepository.save(order);
-    return order;
+    const orderRes = await this.orderRepository.save(order);
+    if(user.cart.length > 0) {
+      for (const item of user.cart) {
+        const orderItem = await this.orderItemRepository.create({
+          name: item?.product?.name,
+          price: item?.product?.price,
+          quantity: item?.product?.quantity,
+          product_id: item?.product?.id,
+          order: orderRes,
+        })
+        await this.orderItemRepository.save(orderItem);
+      }
+    }
+    return this.findOne(orderRes.id, user_id);
   }
 
   async completeOrder(completeOrderDto: CompleteOrderDTO, user_id: number) {

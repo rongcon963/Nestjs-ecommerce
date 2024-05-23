@@ -39,7 +39,7 @@ export class CartService {
     const { product_id, quantity } = createCartDto;
     const product = await this.productService.findOne(product_id);
     if (product.quantity < quantity && product.quantity !== 0) {
-      throw new HttpException(`There is just ${product.quantity} ${product.name} left`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(`There is just ${product.quantity} quantity of ${product.name} left`, HttpStatus.BAD_REQUEST);
     }
     if (product.quantity === 0) {
       throw new HttpException(`The product ${product.name} is out of stock`, HttpStatus.BAD_REQUEST);
